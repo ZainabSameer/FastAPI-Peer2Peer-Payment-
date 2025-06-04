@@ -1,7 +1,15 @@
-from fastapi import FastAPI
-from routes import users, transactions
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from config.environment import db_URI
 
-app = FastAPI()
 
-app.include_router(users.router, prefix="/users")
-app.include_router(transactions.router, prefix="/transactions")
+engine = create_engine(db_URI)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
