@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.user import UserModel
 from serializers.user import UserSchema, UserLogin, UserToken
+from models.account import AccountModel
 from database import get_db
 
 router = APIRouter()
@@ -12,16 +13,33 @@ def create_user(user: UserSchema, db: Session = Depends(get_db)):
         (UserModel.username == user.username) | (UserModel.email == user.email)
     ).first()
 
+
     if existing_user:
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
-    new_user = UserModel(username=user.username, email=user.email)
-    new_user.set_password(user.password_hash)
+
+    new_user = UserModel(
+        username=user.username,
+        email=user.email,
+    )
+    new_user.set_password(user.password)  
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
+    return new_user
+    '''account = AccountModel (
+        user_id = new_user.id, 
+        balance = 0 
+        )
+    db.add(AccountModel)
+    db.commit()'''
+
+    account = AccountModel(user_id=new_user.id)
+    db.add(account)
+    db.commit()
+    
     return new_user
 
 @router.post("/login", response_model=UserToken)

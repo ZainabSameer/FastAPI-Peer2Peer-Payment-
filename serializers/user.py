@@ -5,9 +5,12 @@ class UserSchema(BaseModel):
     email: str
     password_hash: str
 
-    model_config = ConfigDict(
+    '''model_config = ConfigDict(
         from_attributes=True  
-    )
+    )'''
+
+    class Config:
+        orm_mode = True
 
 class UserResponseSchema(BaseModel):
     username: str
